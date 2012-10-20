@@ -3,3 +3,11 @@
 *.filters
 *.user
 *.opensdf
+*.ilk
+*.pdb
+*.lastbuildstate
+*.tlog
+*.log
+*.idb
+*.obj
+*.exe
