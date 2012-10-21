@@ -38,7 +38,8 @@ public:
 	void DropCard(Card const &card);
 	void ShowRemainingCards();
 	void ShowRemainingCards(string &ToFill);
-	void Reset();
+	void EmptyDeck();
+	void ResetDeck();
 
 	class Error : std::exception
 	{

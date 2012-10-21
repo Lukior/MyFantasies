@@ -58,6 +58,8 @@ void CardGame::DropCard(Card const &card)
 {
 	int idx = (card.GetFamily() == "spade" ? 0 : (card.GetFamily() == "heart" ? 1 : (card.GetFamily() == "diamond" ? 2 : (card.GetFamily() == "club" ? 3 : throw Error("DropCard : Unknown card family")))));
 	NotPicked.push_back(card.GetNumber() + (idx * 13) - 1);
+	NotPicked.sort();
+	NotPicked.unique();
 }
 
 void CardGame::ShowRemainingCards()
@@ -78,7 +80,11 @@ void CardGame::ShowRemainingCards(string &ToFill)
 			ToFill += (Cards[i]->GetFamily() + " " + ("" + Cards[i]->GetNumber()) + "\n");
 }
 
-void CardGame::Reset()
+void CardGame::EmptyDeck()
+{
+	NotPicked.clear();
+}
+void CardGame::ResetDeck()
 {
 	NotPicked.clear();
 	for (int idx = 0; idx < 52; ++idx)
