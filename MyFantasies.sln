@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyFantasies", "MyFantasies.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTools", "cpp\GameTools\GameTools.vcxproj", "{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCL", "cpp\OpenCL\OpenCL\OpenCL.vcxproj", "{89838AE5-D324-4BBF-84CD-394506AC97BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Debug|Win32.Build.0 = Debug|Win32
 		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.ActiveCfg = Release|Win32
 		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.Build.0 = Release|Win32
+		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Debug|Win32.Build.0 = Debug|Win32
+		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Release|Win32.ActiveCfg = Release|Win32
+		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

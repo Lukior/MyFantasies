@@ -128,6 +128,11 @@ public:
 			throw Exception(error, "InitContext");
 	}
 
+	void DumpInfo()
+	{
+
+	}
+
 #pragma region KERNEL FUNCTIONS
 
 	void AddKernelSource(std::string const &kernelFile)
