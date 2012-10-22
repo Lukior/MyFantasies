@@ -5,7 +5,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyFantasies", "MyFantasies.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameTools", "cpp\GameTools\GameTools.vcxproj", "{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCL", "cpp\OpenCL\OpenCL\OpenCL.vcxproj", "{89838AE5-D324-4BBF-84CD-394506AC97BF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCL", "cpp\OpenCL\OpenCL.vcxproj", "{89838AE5-D324-4BBF-84CD-394506AC97BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
