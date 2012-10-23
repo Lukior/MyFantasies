@@ -1,8 +1,6 @@
 
 #pragma once
 
-#define __CL_ENABLE_EXCEPTIONS
-
 #include "cl.hpp"
 
 #include <memory>
@@ -131,13 +129,13 @@ public:
 			throw Exception(error, "InitContext");
 	}
 
-	void DumpInfo()
+	void DumpPlatformInfo()
 	{
-		std::cout << "Platform name :\t\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_NAME>() << "\n";
-		std::cout << "       - vendor :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_VENDOR>() << "\n";
-		std::cout << "       - version :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_VERSION>() << "\n";
-		std::cout << "       - profile :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_PROFILE>() << "\n";
-		std::cout << "\nExtensions :\n" << (*ChosenPlatform).getInfo<CL_PLATFORM_EXTENSIONS>() << "\n";
+		std::cout	<< "Platform name :\t\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_NAME>() << "\n"
+					<< "       - vendor :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_VENDOR>() << "\n"
+					<< "       - version :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_VERSION>() << "\n"
+					<< "       - profile :\t" << (*ChosenPlatform).getInfo<CL_PLATFORM_PROFILE>() << "\n"
+					<< "\nExtensions :\n" << (*ChosenPlatform).getInfo<CL_PLATFORM_EXTENSIONS>() << "\n";
 	}
 
 #pragma region KERNEL FUNCTIONS
@@ -371,14 +369,11 @@ private:
 		{
 			if (vendorAny || (platf.getInfo<CL_PLATFORM_VENDOR>().find(VendorNames[PreferedVendor]) != std::string::npos))
 			{
-				try
-				{
-					++idx;
-					platf.getDevices(PreferedDevice, devices.get());
-					PlatformId = idx;
-					break;
-				}
-				catch (Error *e) { delete e; }
+				++idx;
+				if (platf.getDevices(PreferedDevice, devices.get()) != CL_SUCCESS)
+					continue;
+				PlatformId = idx;
+				break;
 			}
 		}
 		if (PlatformId == -1)
@@ -392,6 +387,7 @@ private:
 
 #pragma region EXCEPTION
 
+public:
 	class Exception : std::exception
 	{
 	private:
@@ -405,7 +401,7 @@ private:
 		{}
 
 		Exception(std::string const &errMsg, std::string const &func)
-			:errCode(1), function(func), errorMsg(errorMsg)
+			:errCode(1), function(func), errorMsg(errMsg)
 		{}
 
 		virtual ~Exception() throw()
@@ -417,57 +413,57 @@ private:
 			{
 				switch (errCode)
 				{
-					case CL_SUCCESS:                            return "Success!";
-					case CL_DEVICE_NOT_FOUND:                   return "Device not found.";
-					case CL_DEVICE_NOT_AVAILABLE:               return "Device not available";
-					case CL_COMPILER_NOT_AVAILABLE:             return "Compiler not available";
-					case CL_MEM_OBJECT_ALLOCATION_FAILURE:      return "Memory object allocation failure";
-					case CL_OUT_OF_RESOURCES:                   return "Out of resources";
-					case CL_OUT_OF_HOST_MEMORY:                 return "Out of host memory";
-					case CL_PROFILING_INFO_NOT_AVAILABLE:       return "Profiling information not available";
-					case CL_MEM_COPY_OVERLAP:                   return "Memory copy overlap";
-					case CL_IMAGE_FORMAT_MISMATCH:              return "Image format mismatch";
-					case CL_IMAGE_FORMAT_NOT_SUPPORTED:         return "Image format not supported";
-					case CL_BUILD_PROGRAM_FAILURE:              return "Program build failure";
-					case CL_MAP_FAILURE:                        return "Map failure";
-					case CL_INVALID_VALUE:                      return "Invalid value";
-					case CL_INVALID_DEVICE_TYPE:                return "Invalid device type";
-					case CL_INVALID_PLATFORM:                   return "Invalid platform";
-					case CL_INVALID_DEVICE:                     return "Invalid device";
-					case CL_INVALID_CONTEXT:                    return "Invalid context";
-					case CL_INVALID_QUEUE_PROPERTIES:           return "Invalid queue properties";
-					case CL_INVALID_COMMAND_QUEUE:              return "Invalid command queue";
-					case CL_INVALID_HOST_PTR:                   return "Invalid host pointer";
-					case CL_INVALID_MEM_OBJECT:                 return "Invalid memory object";
-					case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:    return "Invalid image format descriptor";
-					case CL_INVALID_IMAGE_SIZE:                 return "Invalid image size";
-					case CL_INVALID_SAMPLER:                    return "Invalid sampler";
-					case CL_INVALID_BINARY:                     return "Invalid binary";
-					case CL_INVALID_BUILD_OPTIONS:              return "Invalid build options";
-					case CL_INVALID_PROGRAM:                    return "Invalid program";
-					case CL_INVALID_PROGRAM_EXECUTABLE:         return "Invalid program executable";
-					case CL_INVALID_KERNEL_NAME:                return "Invalid kernel name";
-					case CL_INVALID_KERNEL_DEFINITION:          return "Invalid kernel definition";
-					case CL_INVALID_KERNEL:                     return "Invalid kernel";
-					case CL_INVALID_ARG_INDEX:                  return "Invalid argument index";
-					case CL_INVALID_ARG_VALUE:                  return "Invalid argument value";
-					case CL_INVALID_ARG_SIZE:                   return "Invalid argument size";
-					case CL_INVALID_KERNEL_ARGS:                return "Invalid kernel arguments";
-					case CL_INVALID_WORK_DIMENSION:             return "Invalid work dimension";
-					case CL_INVALID_WORK_GROUP_SIZE:            return "Invalid work group size";
-					case CL_INVALID_WORK_ITEM_SIZE:             return "Invalid work item size";
-					case CL_INVALID_GLOBAL_OFFSET:              return "Invalid global offset";
-					case CL_INVALID_EVENT_WAIT_LIST:            return "Invalid event wait list";
-					case CL_INVALID_EVENT:                      return "Invalid event";
-					case CL_INVALID_OPERATION:                  return "Invalid operation";
-					case CL_INVALID_GL_OBJECT:                  return "Invalid OpenGL object";
-					case CL_INVALID_BUFFER_SIZE:                return "Invalid buffer size";
-					case CL_INVALID_MIP_LEVEL:                  return "Invalid mip-map level";
-					default:									return "Unknown";
+				case CL_SUCCESS:								return function + " : Success!";
+				case CL_DEVICE_NOT_FOUND:						return function + " : Device not found.";
+				case CL_DEVICE_NOT_AVAILABLE:					return function + " : Device not available";
+				case CL_COMPILER_NOT_AVAILABLE:					return function + " : Compiler not available";
+				case CL_MEM_OBJECT_ALLOCATION_FAILURE:			return function + " : Memory object allocation failure";
+				case CL_OUT_OF_RESOURCES:						return function + " : Out of resources";
+				case CL_OUT_OF_HOST_MEMORY:						return function + " : Out of host memory";
+				case CL_PROFILING_INFO_NOT_AVAILABLE:			return function + " : Profiling information not available";
+				case CL_MEM_COPY_OVERLAP:						return function + " : Memory copy overlap";
+				case CL_IMAGE_FORMAT_MISMATCH:					return function + " : Image format mismatch";
+				case CL_IMAGE_FORMAT_NOT_SUPPORTED:				return function + " : Image format not supported";
+				case CL_BUILD_PROGRAM_FAILURE:					return function + " : Program build failure";
+				case CL_MAP_FAILURE:							return function + " : Map failure";
+				case CL_INVALID_VALUE:							return function + " : Invalid value";
+				case CL_INVALID_DEVICE_TYPE:					return function + " : Invalid device type";
+				case CL_INVALID_PLATFORM:						return function + " : Invalid platform";
+				case CL_INVALID_DEVICE:							return function + " : Invalid device";
+				case CL_INVALID_CONTEXT:						return function + " : Invalid context";
+				case CL_INVALID_QUEUE_PROPERTIES:				return function + " : Invalid queue properties";
+				case CL_INVALID_COMMAND_QUEUE:					return function + " : Invalid command queue";
+				case CL_INVALID_HOST_PTR:						return function + " : Invalid host pointer";
+				case CL_INVALID_MEM_OBJECT:						return function + " : Invalid memory object";
+				case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:		return function + " : Invalid image format descriptor";
+				case CL_INVALID_IMAGE_SIZE:						return function + " : Invalid image size";
+				case CL_INVALID_SAMPLER:						return function + " : Invalid sampler";
+				case CL_INVALID_BINARY:							return function + " : Invalid binary";
+				case CL_INVALID_BUILD_OPTIONS:					return function + " : Invalid build options";
+				case CL_INVALID_PROGRAM:						return function + " : Invalid program";
+				case CL_INVALID_PROGRAM_EXECUTABLE:				return function + " : Invalid program executable";
+				case CL_INVALID_KERNEL_NAME:					return function + " : Invalid kernel name";
+				case CL_INVALID_KERNEL_DEFINITION:				return function + " : Invalid kernel definition";
+				case CL_INVALID_KERNEL:							return function + " : Invalid kernel";
+				case CL_INVALID_ARG_INDEX:						return function + " : Invalid argument index";
+				case CL_INVALID_ARG_VALUE:						return function + " : Invalid argument value";
+				case CL_INVALID_ARG_SIZE:						return function + " : Invalid argument size";
+				case CL_INVALID_KERNEL_ARGS:					return function + " : Invalid kernel arguments";
+				case CL_INVALID_WORK_DIMENSION:					return function + " : Invalid work dimension";
+				case CL_INVALID_WORK_GROUP_SIZE:				return function + " : Invalid work group size";
+				case CL_INVALID_WORK_ITEM_SIZE:					return function + " : Invalid work item size";
+				case CL_INVALID_GLOBAL_OFFSET:					return function + " : Invalid global offset";
+				case CL_INVALID_EVENT_WAIT_LIST:				return function + " : Invalid event wait list";
+				case CL_INVALID_EVENT:							return function + " : Invalid event";
+				case CL_INVALID_OPERATION:						return function + " : Invalid operation";
+				case CL_INVALID_GL_OBJECT:						return function + " : Invalid OpenGL object";
+				case CL_INVALID_BUFFER_SIZE:					return function + " : Invalid buffer size";
+				case CL_INVALID_MIP_LEVEL:						return function + " : Invalid mip-map level";
+				default:										return function + " : Unknown";
 				}
 			}
 			else
-				return (function + ": " + errorMsg);
+				return (function + " : " + errorMsg);
 		}
 	};
 #pragma endregion

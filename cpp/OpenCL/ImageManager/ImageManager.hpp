@@ -6,5 +6,7 @@
 class ImageManager
 {
 private:
+	
+
 public:
 };

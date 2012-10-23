@@ -11,13 +11,14 @@ int main(int ArgCount, char *ArgValues[])
 //	{
 	try
 	{
-		ocl->InitContext(OpenCL::GPU, OpenCL::NVidia);
-		ocl->DumpInfo();
+		ocl->InitContext();
+		ocl->DumpPlatformInfo();
 		getchar();
 	}
-	catch (std::exception &e)
+	catch (OpenCL::Exception &e)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << "ERROR : " << e.what() << std::endl;
+		getchar();
 	}
 //	}
 	return (0);
