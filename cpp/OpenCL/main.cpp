@@ -1,8 +1,6 @@
 
 #include "CLCLasses/OpenCL.hpp"
 
-#include <boost/gil/gil_all.hpp>
-
 int main(int ArgCount, char *ArgValues[])
 {
 	std::auto_ptr<OpenCL> ocl(new OpenCL());
@@ -13,6 +11,11 @@ int main(int ArgCount, char *ArgValues[])
 	{
 		ocl->InitContext();
 		ocl->DumpPlatformInfo();
+		std::cout << "\nAdding kernel sources...\n";
+		ocl->AddKernelSource("Kernels\\matrix_multiplication_kernel.cl");
+		std::cout << "Kernel compiled !\n";
+		ocl->AddKernel("Kernels\\matrix_multiplication_kernel.cl", "matrix_multiplication_kernel");
+		std::cout << "Kernel ready to be queued !" << std::endl;
 		getchar();
 	}
 	catch (OpenCL::Exception &e)

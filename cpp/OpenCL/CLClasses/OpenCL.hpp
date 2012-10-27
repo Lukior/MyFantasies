@@ -145,12 +145,14 @@ public:
 		std::fstream sourceFile(kernelFile, std::fstream::out | std::fstream::in);
 		std::string kernelCode(std::istreambuf_iterator<char>(sourceFile),
 							  (std::istreambuf_iterator<char>()));
-		kernelSources[kernelFile].reset(new Program::Sources(1,
-										std::make_pair(kernelCode.c_str(),
-										kernelCode.length() + 1)));
-		programs[kernelFile].reset(new Program(*context, *kernelSources[kernelFile]));
-		if ((error = programs[kernelFile]->build(*devices)) != CL_SUCCESS)
+		Program::Sources *src = new Program::Sources(1);
+		(*src)[0] = std::make_pair(kernelCode.c_str(), kernelCode.length() + 1);
+		programs[kernelFile].reset(new Program(*context, *src, &error));
+		if (error != CL_SUCCESS || (error = programs[kernelFile]->build(*devices)) != CL_SUCCESS)
+		{
+			std::cout << std::endl << programs[kernelFile]->getBuildInfo<CL_PROGRAM_BUILD_LOG>((*devices)[0]) << std::endl;
 			throw Exception(error, "AddKernelSource");
+		}
 	}
 
 	void AddKernel(std::string const &kernelFile, std::string const &kernelName)
@@ -391,12 +393,12 @@ public:
 	class Exception : std::exception
 	{
 	private:
-		cl_uint errCode;
+		cl_int errCode;
 		std::string function;
 		std::string errorMsg;
 
 	public:
-		Exception(cl_uint error, std::string const &func) throw()
+		Exception(cl_int error, std::string const &func) throw()
 			:errCode(error), function(func), errorMsg("")
 		{}
 
