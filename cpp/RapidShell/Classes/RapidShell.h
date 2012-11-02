@@ -16,6 +16,8 @@ private:
 #pragma region ATTRIBUTES
 	std::string prompt;
 	std::map<std::string const , std::function<int (std::string)>> commands;
+	bool IsCaseSensitive;
+	bool IsPromptSetable;
 #pragma endregion
 
 #pragma region PRIVATE FUNCTIONS
@@ -67,8 +69,8 @@ private:
 
 public:
 
-	RapidShell(std::string const &newPrompt)
-		:prompt(newPrompt)
+	RapidShell(std::string const &newPrompt, bool caseSensitive = true, bool promptSetable = true)
+		:prompt(newPrompt), IsCaseSensitive(caseSensitive), IsPromptSetable(promptSetable)
 	{
 	}
 
@@ -83,6 +85,8 @@ public:
 			command = Reduce(command);
 			commandArgs = GetArgs(command);
 
+			if (!IsCaseSensitive)
+				std::transform(command.begin(), command.end(), command.begin(), std::tolower);
 			if (command != "")
 			{
 				// BUILT-IN EXIT
@@ -90,7 +94,7 @@ public:
 					return;
 
 				//BUILT-IN SETPROMPT
-				if (command == "setprompt")
+				if (IsPromptSetable && command == "setprompt")
 				{
 					SetPrompt(commandArgs + " ");
 					std::cout << prompt;
@@ -122,6 +126,13 @@ public:
 
 	inline void AddCommand(std::string const &command, std::function<int (std::string)> func)
 	{
-		commands[command] = func;
+		if (!IsCaseSensitive)
+		{
+			std::string &lowCommand = const_cast<std::string &>(command);
+			std::transform(lowCommand.begin(), lowCommand.end(), lowCommand.begin(), std::tolower);
+			commands[lowCommand] = func;
+		}
+		else
+			commands[command] = func;
 	}
 };
