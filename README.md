@@ -16,3 +16,11 @@ OpenCL
 ===========
  
 Containing an OpenCL context wrapper meant to manage a single context. Done to learn the technology.
+cl.hpp provided with the repo because not provided by default with a majority of opencl implementation.
+
+RapidShell
+===========
+
+This is used to make a quick and dirty shell implementation.
+Commands are in a map<string, function>. Possibilities of prompt personnalization.
+May receive additionnal features in the futur.

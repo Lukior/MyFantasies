@@ -11,3 +11,4 @@
 *.idb
 *.obj
 *.exe
+*.unsuccessfulbuild
