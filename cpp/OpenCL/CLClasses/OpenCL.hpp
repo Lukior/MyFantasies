@@ -157,7 +157,7 @@ public:
 
 	void AddKernel(std::string const &kernelFile, std::string const &kernelName)
 	{
-		kernels[kernelFile].reset(new Kernel(*(programs[kernelFile].get()), kernelName.c_str(), &error));
+		kernels[kernelName].reset(new Kernel(*(programs[kernelFile].get()), kernelName.c_str(), &error));
 		if (error != CL_SUCCESS)
 			throw Exception(error, "AddKernel");
 	}
