@@ -23,4 +23,7 @@ RapidShell
 
 This is used to make a quick and dirty shell implementation.
 Commands are in a map<string, function>. Possibilities of prompt personnalization.
+
+Now use boost::spirit for command line parsing. Possibility to use your own grammar definition as a template argument. Done to learn boost::spirit.
+
 May receive additionnal features in the futur.
