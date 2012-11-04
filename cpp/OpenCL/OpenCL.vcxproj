@@ -72,6 +72,7 @@
     <ClInclude Include="CLClasses\cl.hpp" />
     <ClInclude Include="CLClasses\OpenCL.hpp" />
     <ClInclude Include="ImageManager\ImageManager.hpp" />
+    <ClInclude Include="Timer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Kernels\matrix_multiplication_kernel.cl" />
