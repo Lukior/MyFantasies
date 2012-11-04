@@ -10,8 +10,6 @@
 #include <algorithm>
 #include <iostream>
 
-using namespace cl;
-
 class OpenCL
 {
 
@@ -60,17 +58,17 @@ public:
 #pragma region ATTRIBUTES
 
 private:
-	std::auto_ptr<std::vector<Platform>> platforms;
-	std::auto_ptr<std::vector<Device>> devices;
+	std::auto_ptr<std::vector<cl::Platform>> platforms;
+	std::auto_ptr<std::vector<cl::Device>> devices;
 	std::auto_ptr<cl_context_properties> cps;
-	std::auto_ptr<Context> context;
-	std::auto_ptr<CommandQueue> queue;
-	std::map<std::string, std::auto_ptr<Program::Sources>> kernelSources;
-	std::map<std::string, std::auto_ptr<Program>> programs;
-	std::map<std::string, std::auto_ptr<Kernel>> kernels;
+	std::auto_ptr<cl::Context> context;
+	std::auto_ptr<cl::CommandQueue> queue;
+	std::map<std::string, std::auto_ptr<cl::Program::Sources>> kernelSources;
+	std::map<std::string, std::auto_ptr<cl::Program>> programs;
+	std::map<std::string, std::auto_ptr<cl::Kernel>> kernels;
 	std::map<Vendor, std::string> VendorNames;
 
-	Platform *ChosenPlatform;
+	cl::Platform *ChosenPlatform;
 	cl_int error;
 
 #pragma endregion
@@ -85,22 +83,22 @@ public:
 
 #pragma region GETTERS
 
-	inline Context const &GetContext() const
+	inline cl::Context const &GetContext() const
 	{
 		return (*context);
 	}
 
-	inline CommandQueue const &GetCommandQueue() const
+	inline cl::CommandQueue const &GetCommandQueue() const
 	{
 		return (*queue);
 	}
 
-	inline std::vector<Platform> const &GetPlatforms() const
+	inline std::vector<cl::Platform> const &GetPlatforms() const
 	{
 		return (*platforms);
 	}
 
-	inline std::vector<Device> const &GetDevices() const
+	inline std::vector<cl::Device> const &GetDevices() const
 	{
 		return (*devices);
 	}
@@ -114,17 +112,17 @@ public:
 		VendorNames[AMD] = "Advanced Micro Devices";
 		VendorNames[NVidia] = "NVIDIA";
 		VendorNames[Intel] = "Intel";
-		platforms.reset(new std::vector<Platform>());
+		platforms.reset(new std::vector<cl::Platform>());
 		cps.reset(new cl_context_properties[3]);
-		devices.reset(new std::vector<Device>());
+		devices.reset(new std::vector<cl::Device>());
 		
 		ChosenPlatform = &(GetPreferedPlatform(PreferedDevice, PreferedVendor));
 		cps.get()[0] = CL_CONTEXT_PLATFORM;
 		cps.get()[1] = (cl_context_properties)(*ChosenPlatform)();
 		cps.get()[2] = 0;
 
-		context.reset(new Context(PreferedDevice, cps.get()));
-		queue.reset(new CommandQueue(*context, (*devices.get())[0], commandQueueProperties, &error));
+		context.reset(new cl::Context(PreferedDevice, cps.get()));
+		queue.reset(new cl::CommandQueue(*context, (*devices.get())[0], commandQueueProperties, &error));
 		if (error != CL_SUCCESS)
 			throw Exception(error, "InitContext");
 	}
@@ -145,9 +143,9 @@ public:
 		std::fstream sourceFile(kernelFile, std::fstream::out | std::fstream::in);
 		std::string kernelCode(std::istreambuf_iterator<char>(sourceFile),
 							  (std::istreambuf_iterator<char>()));
-		Program::Sources *src = new Program::Sources(1);
+		cl::Program::Sources *src = new cl::Program::Sources(1);
 		(*src)[0] = std::make_pair(kernelCode.c_str(), kernelCode.length() + 1);
-		programs[kernelFile].reset(new Program(*context, *src, &error));
+		programs[kernelFile].reset(new cl::Program(*context, *src, &error));
 		if (error != CL_SUCCESS || (error = programs[kernelFile]->build(*devices)) != CL_SUCCESS)
 		{
 			std::cout << std::endl << programs[kernelFile]->getBuildInfo<CL_PROGRAM_BUILD_LOG>((*devices)[0]) << std::endl;
@@ -157,7 +155,7 @@ public:
 
 	void AddKernel(std::string const &kernelFile, std::string const &kernelName)
 	{
-		kernels[kernelName].reset(new Kernel(*(programs[kernelFile].get()), kernelName.c_str(), &error));
+		kernels[kernelName].reset(new cl::Kernel(*(programs[kernelFile].get()), kernelName.c_str(), &error));
 		if (error != CL_SUCCESS)
 			throw Exception(error, "AddKernel");
 	}
@@ -181,73 +179,73 @@ public:
 
 #pragma region COMMANDQUEUE FUNCTIONS
 
-	inline void EnqueueKernel(std::string const &kernelName, NDRange const &offset, NDRange const &global, NDRange const &local, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueKernel(std::string const &kernelName, cl::NDRange const &offset, cl::NDRange const &global, cl::NDRange const &local, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueNDRangeKernel((*kernels[kernelName]), offset, global, local, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueKernel");
 	}
 
-	inline void EnqueueKernel(std::string const &kernelName, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueKernel(std::string const &kernelName, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueTask((*kernels[kernelName]), events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueKernel");
 	}
 
-	inline void EnqueueKernel(void (*nativeKernel)(void*), std::pair<void*, ::size_t> args, std::vector<Memory> const *memObject = nullptr, std::vector<void const*> const *memLocations = nullptr, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueKernel(void (*nativeKernel)(void*), std::pair<void*, ::size_t> args, std::vector<cl::Memory> const *memObject = nullptr, std::vector<void const*> const *memLocations = nullptr, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueNativeKernel(nativeKernel, args, memObject, memLocations, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueKernel");
 	}
 
-	inline void EnqueueWrite(Buffer const &buffer, BlockMode mode, ::size_t offset, ::size_t buffSize, void const *data, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueWrite(cl::Buffer const &buffer, BlockMode mode, ::size_t offset, ::size_t buffSize, void const *data, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueWriteBuffer(buffer, mode, offset, buffSize, data, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueWrite");
 	}
 
-	inline void EnqueueWrite(Image const &image, BlockMode mode, cl::size_t<3> const &origin, cl::size_t<3> const &region, ::size_t row, ::size_t pitch, void *data, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueWrite(cl::Image const &image, BlockMode mode, cl::size_t<3> const &origin, cl::size_t<3> const &region, ::size_t row, ::size_t pitch, void *data, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueWriteImage(image, mode, origin, region, row, pitch, data, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueWrite");
 	}
 
-	inline void EnqueueRead(Buffer const &buffer, BlockMode mode, ::size_t offset, ::size_t buffSize, void *data, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueRead(cl::Buffer const &buffer, BlockMode mode, ::size_t offset, ::size_t buffSize, void *data, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueReadBuffer(buffer, mode, offset, buffSize, data, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueRead");
 	}
 
-	inline void EnqueueRead(Image const &image, BlockMode mode, cl::size_t<3> const &origin, cl::size_t<3> const &region, ::size_t row, ::size_t pitch, void *data, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueRead(cl::Image const &image, BlockMode mode, cl::size_t<3> const &origin, cl::size_t<3> const &region, ::size_t row, ::size_t pitch, void *data, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueWriteImage(image, mode, origin, region, row, pitch, data, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueRead");
 	}
 
-	inline void EnqueueCopy(Buffer const &source, Buffer const &destination, ::size_t sourceOffset, ::size_t destOffset, ::size_t size, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueCopy(cl::Buffer const &source, cl::Buffer const &destination, ::size_t sourceOffset, ::size_t destOffset, ::size_t size, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueCopyBuffer(source, destination, sourceOffset, destOffset, size, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueCopy");
 	}
 
-	inline void EnqueueCopy(Image const &source, Image const &destination, cl::size_t<3> const &srcOrigin, cl::size_t<3> const &dstOrigin, cl::size_t<3> const &region, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueCopy(cl::Image const &source, cl::Image const &destination, cl::size_t<3> const &srcOrigin, cl::size_t<3> const &dstOrigin, cl::size_t<3> const &region, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueCopyImage(source, destination, srcOrigin, dstOrigin, region, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueCopy");
 	}
 
-	inline void EnqueueCopy(Image const &src, Buffer const &dst, cl::size_t<3> const &srcOrigin, cl::size_t<3> const &region, ::size_t dstOffset, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueCopy(cl::Image const &src, cl::Buffer const &dst, cl::size_t<3> const &srcOrigin, cl::size_t<3> const &region, ::size_t dstOffset, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueCopyImageToBuffer(src, dst, srcOrigin, region, dstOffset, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueCopy");
 	}
 
-	inline void EnqueueCopy(Buffer const &source, Image const &destination, ::size_t srcOffset, cl::size_t<3> const &dstOrigin, cl::size_t<3> const &region, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueCopy(cl::Buffer const &source, cl::Image const &destination, ::size_t srcOffset, cl::size_t<3> const &dstOrigin, cl::size_t<3> const &region, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueCopyBufferToImage(source, destination, srcOffset, dstOrigin, region, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueCopy");
 	}
 
-	inline void *EnqueueMap(Buffer const &buffer, BlockMode mode, cl_map_flags flags, ::size_t offset, ::size_t size, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void *EnqueueMap(cl::Buffer const &buffer, BlockMode mode, cl_map_flags flags, ::size_t offset, ::size_t size, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		void *ret = queue->enqueueMapBuffer(buffer, mode, flags, offset, size, events, event, &error);
 		if (error != CL_SUCCESS)
@@ -255,26 +253,26 @@ public:
 		return ret;
 	}
 
-	inline void *EnqueueMap(Image const &image, BlockMode mode, cl_map_flags flags, cl::size_t<3> &origin, cl::size_t<3> &region, ::size_t *rowPitch, ::size_t *slicePitch, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void *EnqueueMap(cl::Image const &image, BlockMode mode, cl_map_flags flags, cl::size_t<3> &origin, cl::size_t<3> &region, ::size_t *rowPitch, ::size_t *slicePitch, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		void *ret = queue->enqueueMapImage(image, mode, flags, origin, region, rowPitch, slicePitch, events, event, &error);
 		if (error != CL_SUCCESS)
 			throw Exception(error, "EnqueueMap");
 	}
 
-	inline void EnqueueUnmap(Memory const &buffer, void *mappedData, std::vector<Event> const *events = nullptr, Event *event = nullptr)
+	inline void EnqueueUnmap(cl::Memory const &buffer, void *mappedData, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueUnmapMemObject(buffer, mappedData, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueUnmap");
 	}
 
-	inline void EnqueueMarker(Event *event)
+	inline void EnqueueMarker(cl::Event *event)
 	{
 		if ((error = queue->enqueueMarker(event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueMarker");
 	}
 
-	inline void EnqueueWait(std::vector<Event> const &events)
+	inline void EnqueueWait(std::vector<cl::Event> const &events)
 	{
 		if ((error = queue->enqueueWaitForEvents(events)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueWait");
@@ -294,7 +292,7 @@ public:
 
 	inline void FinishQueue(void)
 	{
-		if ((error = queue->finish()) != CL_SUCCESS)
+		if ((error = queue->finish()) != CL_SUCCESS && error != CL_INVALID_COMMAND_QUEUE)
 			throw Exception(error, "FinishQueue");
 	}
 
@@ -302,9 +300,9 @@ public:
 
 #pragma region CONTAINER FUNCTIONS
 
-	Buffer *CreateBuffer(MemMode mode, unsigned int buffSize, void *data = nullptr)
+	cl::Buffer *CreateBuffer(MemMode mode, unsigned int buffSize, void *data = nullptr)
 	{
-		Buffer *newBuffer = new Buffer(*context, mode, buffSize, data, &error);
+		cl::Buffer *newBuffer = new cl::Buffer(*context, mode, buffSize, data, &error);
 
 		if (error != CL_SUCCESS)
 		{
@@ -314,9 +312,9 @@ public:
 		return (newBuffer);
 	}
 
-	Image2D *CreateImage2D(cl_mem_flags flags, ImageFormat format, unsigned int width, unsigned int height, unsigned int rowPitch = 0, void *data = nullptr)
+	cl::Image2D *CreateImage2D(cl_mem_flags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int rowPitch = 0, void *data = nullptr)
 	{
-		Image2D *newImage = new Image2D(*context, flags, format, width, height, rowPitch, data, &error);
+		cl::Image2D *newImage = new cl::Image2D(*context, flags, format, width, height, rowPitch, data, &error);
 
 		if (error != CL_SUCCESS)
 		{
@@ -326,9 +324,9 @@ public:
 		return (newImage);
 	}
 
-	Image3D *CreateImage3D(cl_mem_flags flags, ImageFormat format, unsigned int width, unsigned int height, unsigned int depth, unsigned int rowPitch = 0, unsigned int slicePitch = 0, void *data = nullptr)
+	cl::Image3D *CreateImage3D(cl_mem_flags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int depth, unsigned int rowPitch = 0, unsigned int slicePitch = 0, void *data = nullptr)
 	{
-		Image3D *newImage = new Image3D(*context, flags, format, width, height, depth, rowPitch, slicePitch, data, &error);
+		cl::Image3D *newImage = new cl::Image3D(*context, flags, format, width, height, depth, rowPitch, slicePitch, data, &error);
 		
 		if (error != CL_SUCCESS)
 		{
@@ -338,9 +336,9 @@ public:
 		return (newImage);
 	}
 
-	Sampler *CreateSampler(bool isNormalized, cl_addressing_mode addressing_mode, cl_filter_mode filter_mode)
+	cl::Sampler *CreateSampler(bool isNormalized, cl_addressing_mode addressing_mode, cl_filter_mode filter_mode)
 	{
-		Sampler *newSampler = new Sampler(*context, isNormalized, addressing_mode, filter_mode, &error);
+		cl::Sampler *newSampler = new cl::Sampler(*context, isNormalized, addressing_mode, filter_mode, &error);
 
 		if (error != CL_SUCCESS)
 		{
@@ -355,9 +353,9 @@ public:
 #pragma region PRIVATE FUNCTIONS
 
 private:
-	Platform &GetPreferedPlatform(DeviceType PreferedDevice, Vendor PreferedVendor)
+	cl::Platform &GetPreferedPlatform(DeviceType PreferedDevice, Vendor PreferedVendor)
 	{
-		if ((error = Platform::get(platforms.get())) != CL_SUCCESS)
+		if ((error = cl::Platform::get(platforms.get())) != CL_SUCCESS)
 			throw Exception(error, "GetPreferedPlatform");
 		if (platforms->size() == 0)
 			throw Exception("No OpenCL platforms found", "GetPreferedPlatform");
@@ -367,7 +365,7 @@ private:
 		int idx = -1;
 		if (PreferedVendor == AnyVendor)
 			vendorAny = true;
-		for (Platform platf: *platforms)
+		for (cl::Platform platf: *platforms)
 		{
 			if (vendorAny || (platf.getInfo<CL_PLATFORM_VENDOR>().find(VendorNames[PreferedVendor]) != std::string::npos))
 			{
