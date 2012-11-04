@@ -29,22 +29,36 @@ namespace phoenix = boost::phoenix;
 #pragma region GRAMMAR DECLARATION
 template <typename Iterator>
 struct CommandParser
-	: qi::grammar<Iterator, std::vector<std::string>()>
+	: qi::grammar<Iterator, std::list<std::vector<std::string>>()>
 {
 	CommandParser()
-		: CommandParser::base_type(CommandPattern)
+		: CommandParser::base_type(CommandListPattern)
 	{
+		// StringPattern
 		StringPattern =
+		(
 			qi::lit('"') >> qi::lexeme[*(ascii::char_ - '"')[qi::_val += qi::_1]] >> qi::lit('"')
 			|
-			qi::lexeme[+(ascii::char_ - ' ')[qi::_val += qi::_1]];
+			qi::lexeme[+(ascii::char_ - '&' - ' ')[qi::_val += qi::_1]]
+		);
 
+		// CommandPattern
 		CommandPattern =
-			StringPattern[phoenix::push_back(qi::_val, qi::_1)]
-		>> *(qi::lit(' ') >> StringPattern[phoenix::push_back(qi::_val, qi::_1)]);
+		(
+			StringPattern[phoenix::push_back(qi::_val, qi::_1)] >>
+			*(qi::lit(' ') >> StringPattern[phoenix::push_back(qi::_val, qi::_1)])
+		);
+
+		// CommandListPattern
+		CommandListPattern =
+		(
+			CommandPattern[phoenix::push_back(qi::_val, qi::_1)] >>
+			*(qi::lit(" && ") >> CommandPattern[phoenix::push_back(qi::_val, qi::_1)])
+		);
 	}
 	qi::rule<Iterator, std::string()> StringPattern;
 	qi::rule<Iterator, std::vector<std::string>()> CommandPattern;
+	qi::rule<Iterator, std::list<std::vector<std::string>>()> CommandListPattern;
 };
 #pragma endregion
 
@@ -59,7 +73,7 @@ private:
 	bool IsCaseSensitive;
 	bool IsPromptSetable;
 	GrammarDefinition Parser;
-	std::vector<std::string> CommandList;
+	std::list<std::vector<std::string>> CommandList;
 #pragma endregion
 
 #pragma region PRIVATE FUNCTIONS
@@ -129,30 +143,29 @@ public:
 			if (command != "")
 			{
 				GetArgs(command);
-
-				// BUILT-IN EXIT
-				if (CommandList[0] == "exit")
-					return;
-
-				//BUILT-IN SETPROMPT
-				if (IsPromptSetable && CommandList[0] == "setprompt")
+				std::cout << CommandList.size() << std::endl;
+				for (std::vector<std::string> commandSnippet: CommandList)
 				{
-					SetPrompt(CommandList[1]);
-					command.clear();
-					commandArgs.clear();
-					CommandList.clear();
-					std::cout << prompt;
-					continue;
-				}
+					// BUILT-IN EXIT
+					if (commandSnippet[0] == "exit")
+						return;
 
-				// COMMAND TRY
-				try
-				{
-					commands[CommandList[0]](CommandList);
-				}
-				catch (...)
-				{
-					std::cout << command << " : Unknown command" << std::endl;
+					//BUILT-IN SETPROMPT
+					if (IsPromptSetable && commandSnippet[0] == "setprompt")
+					{
+						SetPrompt(commandSnippet[1]);
+						continue;
+					}
+
+					// COMMAND TRY
+					try
+					{
+						commands[commandSnippet[0]](commandSnippet);
+					}
+					catch (...)
+					{
+						std::cout << commandSnippet[0] << " : Unknown command" << std::endl;
+					}
 				}
 			}
 
