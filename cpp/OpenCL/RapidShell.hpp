@@ -2,7 +2,6 @@
 #pragma once
 
 #pragma region INCLUDES
-
 #include <string>
 #include <map>
 #include <functional>
@@ -11,12 +10,7 @@
 #include <cctype>
 #include <locale>
 
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/home/qi.hpp>
-#include <boost/spirit/home/phoenix.hpp>
-#include <boost/spirit/home/support.hpp>
+#include "boost_include.hpp"
 #pragma endregion
 
 #pragma region NAMESPACES
@@ -62,7 +56,6 @@ struct CommandParser
 };
 #pragma endregion
 
-template<class GrammarDefinition = CommandParser<std::string::iterator>>
 class RapidShell
 {
 private:
@@ -72,7 +65,7 @@ private:
 	std::map<std::string const , std::function<int (std::vector<std::string>)>> commands;
 	bool IsCaseSensitive;
 	bool IsPromptSetable;
-	GrammarDefinition Parser;
+	CommandParser<std::string::iterator> Parser;
 	std::list<std::vector<std::string>> CommandList;
 #pragma endregion
 
@@ -193,6 +186,21 @@ public:
 		}
 		else
 			commands[command] = func;
+	}
+
+	inline void SetStringPattern(qi::rule<std::string::iterator, std::string()> NewStringPattern)
+	{
+		Parser.StringPattern = NewStringPattern;
+	}
+
+	inline void SetCommandPattern(qi::rule<std::string::iterator, std::vector<std::string>()> NewCommandPattern)
+	{
+		Parser.CommandPattern = NewCommandPattern;
+	}
+
+	inline void SetCommandListPattern(qi::rule<std::string::iterator, std::list<std::vector<std::string>>()> NewCommandListPattern)
+	{
+		Parser.CommandListPattern = NewCommandListPattern;
 	}
 #pragma endregion
 

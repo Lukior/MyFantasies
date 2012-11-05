@@ -70,7 +70,7 @@ int matrix_mult(std::vector<std::string> args)
 
 int main(void)
 {
-	RapidShell<> rs("OpenCL Testing Program > ", false, false);
+	RapidShell rs("OpenCL Testing Program > ", false, false);
 
 	rs.AddCommand("matrix_mult", &matrix_mult);
 	rs.Run();
