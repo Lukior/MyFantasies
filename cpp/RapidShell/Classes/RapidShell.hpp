@@ -10,6 +10,9 @@
 #include <cctype>
 #include <locale>
 
+#include <process.h>
+#include <errno.h>
+
 #include "boost_include.hpp"
 #pragma endregion
 
@@ -65,6 +68,7 @@ private:
 	std::map<std::string const , std::function<int (std::vector<std::string>)>> commands;
 	bool IsCaseSensitive;
 	bool IsPromptSetable;
+	bool IsSystemShell;
 	CommandParser<std::string::iterator> Parser;
 	std::list<std::vector<std::string>> CommandList;
 #pragma endregion
@@ -115,10 +119,13 @@ private:
 public:
 
 #pragma region MAIN FUNCTIONS
-	RapidShell(std::string const &newPrompt, bool caseSensitive = true, bool promptSetable = true)
-		:prompt(newPrompt), IsCaseSensitive(caseSensitive), IsPromptSetable(promptSetable), CommandList(64)
+	RapidShell(std::string const &newPrompt, bool caseSensitive = true, bool promptSetable = true, bool systemShell = true)
+		:prompt(newPrompt), IsCaseSensitive(caseSensitive), IsPromptSetable(promptSetable), IsSystemShell(systemShell)
 	{
-		CommandList.clear();
+		AddCommand("setprompt", [&] (std::vector<std::string> args) -> int {
+			SetPrompt(args[1]);
+			return 0;
+		});
 	}
 
 	void Run()
@@ -142,13 +149,6 @@ public:
 					if (commandSnippet[0] == "exit")
 						return;
 
-					//BUILT-IN SETPROMPT
-					if (IsPromptSetable && commandSnippet[0] == "setprompt")
-					{
-						SetPrompt(commandSnippet[1]);
-						continue;
-					}
-
 					// COMMAND TRY
 					try
 					{
@@ -156,7 +156,16 @@ public:
 					}
 					catch (...)
 					{
-						std::cout << commandSnippet[0] << " : Unknown command" << std::endl;
+						if (IsSystemShell)
+						{
+							std::string comm;
+							for (std::string str: commandSnippet)
+								comm += str;
+							if (system(comm.c_str()) == -1)
+								std::cout << strerror(errno) << std::endl;
+						}
+						else
+							std::cout << commandSnippet[0] << " : Unknown Command" << std::endl;
 					}
 				}
 			}

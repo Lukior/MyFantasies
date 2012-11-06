@@ -62,7 +62,7 @@ private:
 
 #pragma region ATTRIBUTES
 	std::string prompt;
-	std::map<std::string const , std::function<int (std::vector<std::string>)>> commands;
+	std::map<std::string const, std::function<int (std::vector<std::string>)>> commands;
 	bool IsCaseSensitive;
 	bool IsPromptSetable;
 	CommandParser<std::string::iterator> Parser;

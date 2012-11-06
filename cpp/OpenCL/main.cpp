@@ -12,8 +12,8 @@ int matrix_mult(std::vector<std::string> args)
 		return -1;
 	}
 
-	int MatrixSize = boost::lexical_cast<int, std::string>(args[1]);
-	MatrixSize *= MatrixSize;
+	int MatrixBorder = boost::lexical_cast<int, std::string>(args[1]);
+	int MatrixSize = MatrixBorder * MatrixBorder;
 	int WorkGroups = boost::lexical_cast<int, std::string>(args[2]);
 	int WorkUnits = boost::lexical_cast<int, std::string>(args[3]);
 
@@ -39,14 +39,14 @@ int matrix_mult(std::vector<std::string> args)
 		bufmat2 = ocl->CreateBuffer(OpenCL::ReadOnly, MatrixSize * sizeof(double), mat2);
 		bufres = ocl->CreateBuffer(OpenCL::WriteOnly, MatrixSize * sizeof(double), result);
 		t.Start();
-		ocl->EnqueueWrite(*bufmat1, OpenCL::Blocking, 0, MatrixSize * sizeof(double), mat1);
-		ocl->EnqueueWrite(*bufmat2, OpenCL::Blocking, 0, MatrixSize * sizeof(double), mat2);
+		ocl->EnqueueWrite(*bufmat1, OpenCL::NotBlocking, 0, MatrixSize * sizeof(double), mat1);
+		ocl->EnqueueWrite(*bufmat2, OpenCL::NotBlocking, 0, MatrixSize * sizeof(double), mat2);
 		ocl->SetKernelArgument("matrix_multiplication_kernel", 0, *bufmat1);
 		ocl->SetKernelArgument("matrix_multiplication_kernel", 1, *bufmat2);
 		ocl->SetKernelArgument("matrix_multiplication_kernel", 2, *bufres);
-		ocl->SetKernelArgument("matrix_multiplication_kernel", 3, 1024);
-		ocl->SetKernelArgument("matrix_multiplication_kernel", 4, 1024);
-		std::cout << "Enqueueing kernel" << std::endl;
+		ocl->SetKernelArgument("matrix_multiplication_kernel", 3, MatrixBorder);
+		ocl->SetKernelArgument("matrix_multiplication_kernel", 4, MatrixBorder);
+		std::cout << "Enqueues kernel" << std::endl;
 		ocl->FinishQueue();
 		ocl->EnqueueKernel("matrix_multiplication_kernel", cl::NullRange, WorkGroups, WorkUnits);
 		ocl->FinishQueue();
