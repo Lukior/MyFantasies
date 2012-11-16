@@ -15,24 +15,27 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Debug|Win32.ActiveCfg = Debug|Win32
-		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Debug|Win32.Build.0 = Debug|Win32
-		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Release|Win32.ActiveCfg = Release|Win32
-		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Release|Win32.Build.0 = Release|Win32
-		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Debug|Win32.Build.0 = Debug|Win32
-		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.ActiveCfg = Release|Win32
-		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.Build.0 = Release|Win32
 		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Debug|Win32.ActiveCfg = Debug|Win32
 		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Debug|Win32.Build.0 = Debug|Win32
 		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Release|Win32.ActiveCfg = Release|Win32
 		{89838AE5-D324-4BBF-84CD-394506AC97BF}.Release|Win32.Build.0 = Release|Win32
+		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Debug|Win32.Build.0 = Debug|Win32
+		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Release|Win32.ActiveCfg = Release|Win32
+		{A99D55F6-BE88-414C-BF1D-B637A416864A}.Release|Win32.Build.0 = Release|Win32
 		{BB687BB0-3241-499F-9357-EF166BADC86D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{BB687BB0-3241-499F-9357-EF166BADC86D}.Debug|Win32.Build.0 = Debug|Win32
 		{BB687BB0-3241-499F-9357-EF166BADC86D}.Release|Win32.ActiveCfg = Release|Win32
 		{BB687BB0-3241-499F-9357-EF166BADC86D}.Release|Win32.Build.0 = Release|Win32
+		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Debug|Win32.Build.0 = Debug|Win32
+		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.ActiveCfg = Release|Win32
+		{ED0DE2D1-2E4A-40DC-9733-0C0C577F29DF}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

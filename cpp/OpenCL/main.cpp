@@ -23,9 +23,9 @@ int matrix_mult(std::vector<std::string> args)
 	double *mat2 = new double[MatrixSize];
 	double *result = new double[MatrixSize];
 
-	cl::Buffer *bufmat1;
-	cl::Buffer *bufmat2;
-	cl::Buffer *bufres;
+	cl::Buffer *bufmat1 = nullptr;
+	cl::Buffer *bufmat2 = nullptr;
+	cl::Buffer *bufres = nullptr;
 	try
 	{
 		ocl->InitContext();
@@ -35,9 +35,9 @@ int matrix_mult(std::vector<std::string> args)
 		std::cout << "Kernel compiled !\n";
 		ocl->AddKernel("Kernels\\matrix_multiplication_kernel.cl", "matrix_multiplication_kernel");
 		std::cout << "Kernel ready to be queued !" << std::endl;
-		bufmat1 = ocl->CreateBuffer(OpenCL::ReadOnly, MatrixSize * sizeof(double), mat1);
-		bufmat2 = ocl->CreateBuffer(OpenCL::ReadOnly, MatrixSize * sizeof(double), mat2);
-		bufres = ocl->CreateBuffer(OpenCL::WriteOnly, MatrixSize * sizeof(double), result);
+		bufmat1 = ocl->CreateBuffer(OpenCL::MemFlags::CopyHostMemory, MatrixSize * sizeof(double), mat1);
+		bufmat2 = ocl->CreateBuffer(OpenCL::MemFlags::CopyHostMemory, MatrixSize * sizeof(double), mat2);
+		bufres = ocl->CreateBuffer(OpenCL::MemFlags::Null, MatrixSize * sizeof(double));
 		t.Start();
 		ocl->EnqueueWrite(*bufmat1, OpenCL::NotBlocking, 0, MatrixSize * sizeof(double), mat1);
 		ocl->EnqueueWrite(*bufmat2, OpenCL::NotBlocking, 0, MatrixSize * sizeof(double), mat2);
@@ -59,9 +59,12 @@ int matrix_mult(std::vector<std::string> args)
 	{
 		std::cout << "ERROR : " << e.what() << std::endl;
 	}
-	delete bufmat1;
-	delete bufmat2;
-	delete bufres;
+	if (bufmat1)
+		delete bufmat1;
+	if (bufmat2)
+		delete bufmat2;
+	if (bufres)
+		delete bufres;
 	delete mat1;
 	delete mat2;
 	delete result;

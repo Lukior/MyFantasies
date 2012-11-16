@@ -9,6 +9,8 @@
 #include <exception>
 #include <iostream>
 
+#include <boost/assign.hpp>
+
 using namespace std;
 
 class Card

@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "cl.hpp"
+#include <CL/cl.hpp>
 
+#include <functional>
 #include <memory>
 #include <fstream>
 #include <map>
@@ -34,11 +35,15 @@ public:
 		Intel
 	};
 
-	enum MemMode
+	enum MemFlags
 	{
-		ReadOnly = CL_MEM_READ_ONLY,
+		Null = 0,
+		UseHostMemory = CL_MEM_USE_HOST_PTR,
+		CopyHostMemory = CL_MEM_COPY_HOST_PTR,
+		AllocateHostMemory = CL_MEM_ALLOC_HOST_PTR,
+		ReadWrite = CL_MEM_READ_WRITE,
 		WriteOnly = CL_MEM_WRITE_ONLY,
-		ReadWrite = CL_MEM_READ_WRITE
+		ReadOnly = CL_MEM_READ_ONLY
 	};
 
 	enum BlockMode
@@ -191,7 +196,7 @@ public:
 			throw Exception(error, "EnqueueKernel");
 	}
 
-	inline void EnqueueKernel(void (*nativeKernel)(void*), std::pair<void*, ::size_t> args, std::vector<cl::Memory> const *memObject = nullptr, std::vector<void const*> const *memLocations = nullptr, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
+	inline void EnqueueKernel(void (__stdcall*nativeKernel)(void*), std::pair<void*, ::size_t> args, std::vector<cl::Memory> const *memObject = nullptr, std::vector<void const*> const *memLocations = nullptr, std::vector<cl::Event> const *events = nullptr, cl::Event *event = nullptr)
 	{
 		if ((error = queue->enqueueNativeKernel(nativeKernel, args, memObject, memLocations, events, event)) != CL_SUCCESS)
 			throw Exception(error, "EnqueueKernel");
@@ -300,9 +305,9 @@ public:
 
 #pragma region CONTAINER FUNCTIONS
 
-	cl::Buffer *CreateBuffer(MemMode mode, unsigned int buffSize, void *data = nullptr)
+	cl::Buffer *CreateBuffer(MemFlags flags, unsigned int buffSize, void *data = nullptr)
 	{
-		cl::Buffer *newBuffer = new cl::Buffer(*context, mode, buffSize, data, &error);
+		cl::Buffer *newBuffer = new cl::Buffer(*context, flags, buffSize, data, &error);
 
 		if (error != CL_SUCCESS)
 		{
@@ -312,7 +317,7 @@ public:
 		return (newBuffer);
 	}
 
-	cl::Image2D *CreateImage2D(cl_mem_flags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int rowPitch = 0, void *data = nullptr)
+	cl::Image2D *CreateImage2D(MemFlags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int rowPitch = 0, void *data = nullptr)
 	{
 		cl::Image2D *newImage = new cl::Image2D(*context, flags, format, width, height, rowPitch, data, &error);
 
@@ -324,7 +329,7 @@ public:
 		return (newImage);
 	}
 
-	cl::Image3D *CreateImage3D(cl_mem_flags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int depth, unsigned int rowPitch = 0, unsigned int slicePitch = 0, void *data = nullptr)
+	cl::Image3D *CreateImage3D(MemFlags flags, cl::ImageFormat format, unsigned int width, unsigned int height, unsigned int depth, unsigned int rowPitch = 0, unsigned int slicePitch = 0, void *data = nullptr)
 	{
 		cl::Image3D *newImage = new cl::Image3D(*context, flags, format, width, height, depth, rowPitch, slicePitch, data, &error);
 		
@@ -467,5 +472,4 @@ public:
 		}
 	};
 #pragma endregion
-
 };

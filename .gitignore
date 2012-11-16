@@ -13,3 +13,6 @@
 *.exe
 *.unsuccessfulbuild
 *.ipch
+*.psess
+*.xml
+*.lastcodeanalysissucceeded
